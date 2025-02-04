@@ -1,3 +1,6 @@
+Comandi Progetto Torino Francesco Maria (Id Progetto: 34)
+
+
 ################## Analisi bivariata tra Customer Value e Frequency of SMS ##################
 
 #Calcolo covarianza campionaria della relazione tra Customer Value e Frequency of SMS

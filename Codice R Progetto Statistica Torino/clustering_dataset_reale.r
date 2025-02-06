@@ -89,18 +89,52 @@ plot(k_values, silhouette_scores, type = "b", pch = 19, col = "blue",
      xlab = "Numero di cluster (k)", ylab = "Punteggio silhouette",
      main = "Punteggi silhouette per diversi k")
 
-#Creazione dataset senza outliers su Seconds of use
 
-Q1 <- quantile(dataset$Seconds.of.Use, 0.25)
-Q3 <- quantile(dataset$Seconds.of.Use, 0.75)
-IQR <- Q3 - Q1
-lower_limit <- Q1 - 1.5 * IQR
-upper_limit <- Q3 + 1.5 * IQR
-median_value <- median(dataset$Seconds.of.Use, na.rm = TRUE)
-dataset$Seconds.of.Use <- ifelse(
-  dataset$Seconds.of.Use < lower_limit | dataset$Seconds.of.Use > upper_limit,
-  median_value,
-  dataset$Seconds.of.Use
-)
-write.csv(dataset, file = "Customer_Churn_without_outliers.csv", row.names = FALSE)
-dataset <- read.csv("Customer_Churn_without_outliers.csv")
+########Clustering senza outliers con kmeans++#############
+
+library(ClusterR)
+library(ggplot2)
+library(cluster)
+library(factoextra)
+
+# Subset dei dati e scaling
+data_subset <- dataset[, c("Complains", "Status", "Seconds.of.Use")]
+data_scaled <- scale(data_subset)
+
+# Clustering con K-Means++ (k = 4)
+set.seed(123)
+kmeans_model <- KMeans_rcpp(data_scaled, clusters = 4, num_init = 10, initializer = "kmeans++")
+
+# Aggiungo i cluster al dataset
+dataset$Cluster <- as.factor(kmeans_model$clusters)
+
+# Stampa WSS, BSS, e CH Index
+kmeans_model
+
+# Numero di osservazioni
+n <- nrow(data_scaled)  
+
+# Numero di cluster
+k <- 4  
+
+# Valori di BSS e WSS dal modello KMeans++
+bss <- 8353.02  
+wss <- 1093.98  
+
+# Calcolo dell'Indice di Calinski-Harabasz
+ch_index <- (bss / (k - 1)) / (wss / (n - k))
+
+# Stampa del risultato
+cat("Calinski-Harabasz Index:", ch_index, "\n")cat("Calinski-Harabasz Index:", ch_index, "\n")
+
+# Tabella di confronto tra Churn e Cluster
+table(dataset$Churn, dataset$Cluster)
+
+# Visualizzazione: Media di Seconds of Use per Cluster
+ggplot(dataset, aes(x = Cluster, y = Seconds.of.Use, fill = Cluster)) +
+    geom_bar(stat = "summary", fun = "mean", width = 0.6) +
+    labs(title = "Media di Seconds of Use per Cluster",
+         x = "Cluster",
+         y = "Media Seconds of Use") +
+    theme_minimal() +
+    scale_fill_brewer(palette = "Set3")

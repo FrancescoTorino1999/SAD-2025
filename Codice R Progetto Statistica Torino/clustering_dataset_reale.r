@@ -13,7 +13,7 @@ varImpPlot(churn_rf)
 #Elbow method
 library(ggplot2)
 
-data <- dataset[, c("Complains", "Status", "Seconds.of.Use", "Frequency.of.use", "Subscription..Length")]
+data <- dataset[, c("Complains", "Status", "Seconds.of.Use")]
 
 data_scaled <- scale(data)
 

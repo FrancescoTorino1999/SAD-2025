@@ -2181,26 +2181,30 @@ ggplot(dataset, aes(x = Cluster, y = Seconds.of.Use, fill = Cluster)) +
 
 ############################ Studio popolazioni ############################
 
+#############Test chi-quadro per churn (Distribuzione binomiale)#########
 
-#############Test chi-quadro per churn#########
+# Calcoliamo le frequenze osservate
 observed <- table(dataset$Churn)
-n_trials <- sum(observed)
-successes <- observed["1"]
-failures <- observed["0"]
-p_estimated <- successes / n_trials  # Probabilità stimata di successo
+n_trials <- sum(observed)  # Numero totale di osservazioni
+successes <- observed["1"]  # Successi (churn)
+failures <- observed["0"]   # Insuccessi (no churn)
+p_estimated <- successes / n_trials  # Probabilità stimata di successo (p)
 
-# Calcoliamo la probabilità di successo (p) per la distribuzione di Bernoulli
-k_values <- names(observed)
+# Probabilità attese per la distribuzione binomiale
+expected_prob_success <- p_estimated  # Probabilità di successo (churn)
+expected_prob_failure <- 1 - p_estimated  # Probabilità di insuccesso (no churn)
 
-# Probabilità attese per la distribuzione Bernoulli
-expected_prob <- c(p_estimated, 1 - p_estimated)  # Successo e fallimento
+# Frequenze attese basate sulla distribuzione binomiale
+expected_freq_success <- expected_prob_success * n_trials
+expected_freq_failure <- expected_prob_failure * n_trials
 
-# Frequenze attese
-expected_freq <- expected_prob * n_trials
+# Frequenze attese totali
+expected_freq <- c(expected_freq_success, expected_freq_failure)
 
 # Test del chi-quadro
-chisq_result <- chisq.test(x = observed, p = expected_prob, rescale.p = TRUE)
+chisq_result <- chisq.test(x = observed, p = expected_prob_success, rescale.p = TRUE)
 
+# Visualizza il risultato del test
 chisq_result
 
 ###############Stima intervallare per p cappello######
